@@ -1,73 +1,203 @@
-# Pehchaan — posts that sound like you
+<div align="center">
+  <img src="docs/images/pehchaan-hero.svg" alt="Pehchaan: one idea, your voice, and drafts for three social channels" width="100%" />
 
-A creator-first social-writing studio for Instagram, LinkedIn, and X.
+  <h1>Pehchaan</h1>
+  <h3>Posts that sound like you.</h3>
+  <p>Turn one rough thought into thoughtful, editable social drafts—shaped by your voice, audience, and channel.</p>
 
-## Run the app
+  <a href="#quickstart">Run locally</a> · <a href="#the-90-second-demo">See the demo path</a> · <a href="#how-it-works">How it works</a>
+  <br /><br />
+  <img alt="Python 3.10+" src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" />
+  <img alt="Flask" src="https://img.shields.io/badge/Flask-local%20first-315C43?logo=flask&logoColor=white" />
+  <img alt="Five writing languages" src="https://img.shields.io/badge/Writing%20languages-5-EA8A70" />
+  <img alt="MIT License" src="https://img.shields.io/badge/License-MIT-F2C45E" />
+</div>
 
-1. Install Python 3.10 or later.
-2. Run `python -m venv .venv`.
-3. Activate the environment and run `pip install -r requirements.txt`.
-4. Start the app with `python app.py` and open `http://127.0.0.1:8890`.
+---
 
-Flask is required for social API access, multilingual transcription, and generation.
+## The pitch
 
-## MVP flow
+Creators do not need another blank prompt box. They need a repeatable way to turn what they mean into posts that still sound like them—without rewriting the same idea for every platform.
 
-- Start with a social profile URL. Results are unchecked until you select the posts you wrote; only selected posts flow into the voice examples when you continue. Then choose creator type, channel, language, and whether to use posts, an audio recording, or a voice description.
-- Select NGO, business, influencer / creator, or product / brand.
-- Inspect computed writing metrics, voice notes, do/don't guidance, and six sample posts per brand.
-- Generate editable, platform-adapted drafts with a requested word count, formality, energy, and campaign intent controls. The editor shows the actual Unicode-aware word count. The configured model gets up to eight expansion passes; when the model or a platform character limit cannot reach the request after expansion passes, the target is reset to the actual count and the reason is shown. X targets are capped at 35 words to fit 280 characters.
-- Optionally add a goal, audience, verified facts, or writing rules when a post needs them.
-- Use Rewrite, Improve clarity, Expand, Shorten, and Add CTA actions on the adapted draft, then use edits as direction for another pass.
-- Optionally add a campaign keyword and its context; supplied terms are used naturally.
-- Explore related and rising search phrases from Google Trends, filter by region, and add chosen phrases to the draft keyword field. Trends interest is relative, not search volume or a reach prediction.
-- Choose a discovery goal: social + SEO, AEO, GEO, or all three. These are structural writing aids, not ranking promises.
-- Build and edit a coordinated Instagram, LinkedIn, and X campaign pack from one brief.
-- Choose Instagram, LinkedIn, X, or Telegram via the configured n8n posting workflow.
-- Build a voice profile from selected profile posts, pasted posts, a recording transcribed locally with IndicConformer for Hindi/Kannada and Whisper fallback, or a no-history voice description. Kannada, Hindi, and English can be selected for speech recognition; draft language remains a separate choice.
-- Import Instagram profile posts using SerpAPI’s Instagram Profile API. X timelines use the X API; LinkedIn imports use the official Posts API and the connected member account. No generic Google search is used.
-- Inspect an explainable quality rubric for voice fit, platform fit, keyword/context, clarity, brand safety, and discovery readiness.
-- Explicitly approve the exact saved draft before publishing. Native Instagram, LinkedIn, and X posting require their authorized provider connections. Telegram uses the configured n8n webhook and accepts an optional image-generation prompt.
-- Generated and built-in sample copy is emoji-free.
-- Continue with local starter drafts when no model is configured. Sarvam is used for multilingual generation when configured.
+**Pehchaan is a creator-first writing workspace:** bring an idea, a few authored examples, or a voice description; shape a concise campaign brief; then review platform-specific drafts before anything is published.
 
-## API configuration
+> **One idea. Your voice. Three channels. You keep the final edit.**
 
-The Flask API loads a local `.env` file at startup (the file is ignored by Git). Copy `.env.example` to `.env`, add provider keys there, and never commit credentials. For local use, Flask session and token-encryption keys are generated into ignored files if left blank. For a hosted deployment, set strong `FLASK_SECRET_KEY` and a Fernet-compatible `TOKEN_ENCRYPTION_KEY` through the host's secret manager:
+## The product, at a glance
 
-- `SARVAM_API_KEY`: enables Sarvam Chat Completion V1.
-- `SARVAM_MODEL`: optional model identifier; defaults to `sarvam-105b`.
-- `SERPAPI_API_KEY`: enables Instagram profile post import and Google Trends related-query suggestions.
-- `TELEGRAM_POST_WEBHOOK_URL`: optional HTTPS n8n webhook. On explicit approval, the app sends `text` and `prompt` as URL query parameters; an empty `prompt` requests a regular text post.
-- `LLM_API_KEY`: API credential for an OpenAI-compatible chat-completions endpoint.
-- `LLM_MODEL`: model identifier for that endpoint.
-- `LLM_BASE_URL`: optional API base URL; defaults to `https://api.openai.com/v1`.
+![Illustrated Pehchaan workflow from a creator brief and voice profile to Instagram, LinkedIn, and X drafts](docs/images/pehchaan-flow.svg)
 
-Credentials stay server-side. Sarvam Chat Completion V1 is used for English, Hindi, Kannada, Hinglish, and Kanglish generation when configured. No custom ML model training is required; Python computes text metrics and a transparent heuristic score. The score is not a prediction of reach or engagement.
+### Why creators reach for it
 
-## Public search and account connections
+- **A voice that has context:** build a reusable profile from selected authored posts or your own style notes. Each post stays its own example instead of becoming one blended template.
+- **One brief, three adaptations:** generate and edit an Instagram caption, LinkedIn post, and X post from the same idea.
+- **More control than “make it better”:** set audience, goal, approved facts, writing rules, language, tone, and length. See word counts and platform limits as you work.
+- **Made for multilingual creators:** choose English, Hindi, Kannada, Hinglish, or Kanglish. Hindi and Kannada speech input uses local IndicConformer first, with local Whisper fallback; English uses local Whisper.
+- **Useful discovery, without reach promises:** explore Google Trends related searches as optional context. The writing-quality rubric is directional; it does not predict reach or engagement.
+- **Human approval stays in the loop:** every publish request is gated by approval of the saved draft.
 
-Instagram posts come from SerpAPI’s dedicated Instagram Profile API engine and must match the requested username. X posts come from the connected account’s X API timeline. LinkedIn posts come from the connected member’s official Posts API endpoint and require the restricted `r_member_social` permission plus `w_member_social` to publish. Generic Google organic results are not used. Tokens are encrypted at rest in local SQLite; development session/encryption keys are generated locally and ignored by Git.
+## How it works
 
-## API
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#e5f2e7","primaryTextColor":"#203b30","primaryBorderColor":"#5c9b72","lineColor":"#799e85","secondaryColor":"#fff0e4","tertiaryColor":"#ebeafd","fontFamily":"Arial"}}}%%
+flowchart LR
+    A[💡 Idea, authored posts<br/>or voice notes] --> B[🧭 Shape the brief<br/>audience · goal · facts]
+    B --> C[🪪 Apply a saved voice<br/>or style preferences]
+    C --> D[✍️ Generate and refine<br/>language · length · channel]
+    D --> E[📦 Instagram + LinkedIn + X]
+    E --> F[👀 Edit, review, approve]
+    F --> G[🚀 Optional configured<br/>publishing workflow]
+    classDef idea fill:#fff0e4,stroke:#e58e70,color:#593b31,stroke-width:2px
+    classDef brief fill:#e5f2e7,stroke:#65a77a,color:#203b30,stroke-width:2px
+    classDef voice fill:#fff4d6,stroke:#d4a847,color:#594620,stroke-width:2px
+    classDef draft fill:#ebeafd,stroke:#8a82d4,color:#302d58,stroke-width:2px
+    classDef publish fill:#dff1ed,stroke:#4aa68d,color:#174a3f,stroke-width:2px
+    class A idea
+    class B brief
+    class C voice
+    class D,E draft
+    class F,G publish
+```
 
-- `POST /api/analyze` accepts `brand_id`, optional `sample_posts`, and voice preferences; returns computed metrics and a profile. Empty post history is supported in preference mode.
-- `POST /api/discover` accepts up to three X, LinkedIn, or Instagram profile URLs and uses the matching platform API (SerpAPI only for Instagram).
-- `POST /api/trends` accepts a query, region, and language and returns Google Trends rising and popular related searches for the past 12 months. Identical queries are cached locally for one hour.
-- `POST /api/transcribe` calls the installed KrishiDisha local STT workflow through a persistent worker, keeping IndicConformer loaded between recordings. Hindi/Kannada use IndicConformer with local Whisper fallback; auto-detect adds a local Whisper language-ID pass before routing detected Hindi/Kannada through IndicConformer. Choose the spoken language to skip language detection for lower latency. Judge accuracy is selected by default, with a Fast live option. The spoken language stays separate from the draft language, and script checks reject wrong-script Hindi/Kannada transcripts. No cloud STT or model download is used; audio is temporary and deleted after transcription. The interface stops microphone recordings at 28 seconds.
-- `POST /api/generate` accepts creator category, voice source, topic, platform, output language, discovery optimization target, keyword and context, audience, approved facts, writing rules, and optional edit direction; returns one adapted draft and the actual word count; impossible character-limit targets are reported.
-- `POST /api/score` applies a transparent weighted heuristic for voice, channel, keyword/context, clarity, safety, and discovery structure. It does not predict reach or engagement.
-- `POST /api/research` is retired; Google Trends is a separate, query-focused discovery feature.
-- `GET /api/health` reports whether Sarvam, another compatible model, or local mode is active, plus safe integration availability flags.
+### Under the hood
 
-## Current limit
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#edf5ee","primaryTextColor":"#243b31","primaryBorderColor":"#6c9d79","lineColor":"#8da899","secondaryColor":"#fff0e4","tertiaryColor":"#eeedfa","fontFamily":"Arial"}}}%%
+flowchart TB
+    UI[Browser workspace] --> API[Flask app]
+    API --> DB[(Local SQLite<br/>profiles · briefs · drafts)]
+    API --> GEN[Configured writing model<br/>Sarvam or compatible endpoint]
+    API --> STT[Local speech worker<br/>IndicConformer + Whisper]
+    API --> TRENDS[Google Trends suggestions<br/>optional SerpAPI profile lookup]
+    API --> PUBLISH[Optional HTTPS webhook]
+    GEN --> CHECK[Length · language/script<br/>and writing-quality checks]
+    CHECK --> UI
+    STT --> UI
+    TRENDS --> UI
+    PUBLISH --> REVIEW[Explicitly approved draft]
+    classDef local fill:#e5f2e7,stroke:#65a77a,color:#203b30,stroke-width:2px
+    classDef external fill:#fff0e4,stroke:#e58e70,color:#593b31,stroke-width:2px
+    classDef review fill:#ebeafd,stroke:#8a82d4,color:#302d58,stroke-width:2px
+    class UI,API,DB,STT,CHECK local
+    class GEN,TRENDS,PUBLISH external
+    class REVIEW review
+```
 
-Native platform publishing supports Instagram, LinkedIn, and X and requires the matching approved provider app and account connection; Instagram publishing also requires a publicly reachable media URL. Telegram delivery uses the n8n webhook configured in `TELEGRAM_POST_WEBHOOK_URL`. Every publish request requires explicit approval of the exact saved draft text. This prototype is designed for localhost use; a public deployment also needs user authentication, CSRF protection, and per-user account/token isolation.
+## Pehchaan vs a general-purpose VLM
 
-## Pehchaan profiles, campaigns, and integration readiness
+A general-purpose model can write social posts—and, with the right context, follow a voice guide or return several platform versions. ChatGPT also offers Custom Instructions and Projects for reusable guidance and context ([Custom Instructions](https://help.openai.com/en/articles/8096356-chatgpt-custom-instructions), [Projects](https://help.openai.com/en/articles/10169521-projects-in-chatgpt)). **Pehchaan does not claim that a general model cannot do the writing. It packages the repeatable creator workflow as the product.**
 
-The Flask app stores custom voice profiles, campaign briefs, editable drafts, and provider-reported performance snapshots in a local `voiceprint.sqlite3` file. The API serves four starter voice profiles and eight scenario templates for each audience category (NGO, business, creator, product). Keywords and their context are optional. Generation supports English, Hindi, Kannada, Hinglish, and Kanglish.
+| Workflow moment | General-purpose VLM (for example, ChatGPT) | Pehchaan |
+|---|---|---|
+| Start a campaign | Explain the task in a prompt; add relevant files or context | Guided brief for idea, audience, goal, facts, voice, language, and length |
+| Reuse a voice | Provide a voice guide, examples, or configured instructions/context | Save and select a voice profile built from posts or style preferences |
+| Adapt across channels | Ask for each channel and its constraints | Build an editable Instagram + LinkedIn + X pack from one brief |
+| Keep constraints visible | Include them in the prompt and review the result | Word target, platform limits, approved facts, and writing rules are first-class controls |
+| Work with Indian languages | Prompt for the desired language and script | Explicit language choices plus a local Hindi/Kannada speech-transcription path |
+| Decide what goes live | Copy the answer into a publishing workflow | Review and explicitly approve the saved draft; optional webhook publishing |
 
-Generation takes `scenario_id`, `language`, `target_words`, `formality`, `energy`, `campaign_intent`, `keywords`, and `keyword_context`. Emoji controls and generation behavior have been removed; generated and saved draft text is sanitized. Sarvam is the configured multilingual provider when `SARVAM_API_KEY` is available.
+**Fair-comparison note:** this compares default workflow shape, not raw model quality. Both approaches need human review, and output depends on the chosen model, prompt, and configuration.
 
-OAuth connection routes use `/auth/<platform>/start` and `/auth/<platform>/callback`. Connections show as unavailable until each provider app is configured. Authorized authored-post import is available through `/api/platforms/<platform>/posts` for providers/scopes that allow it; this does not unlock consumer/private-account access beyond the platform API. Metric sync is available through `POST /api/performance/sync` for Pehchaan-published posts where the provider returns permitted metrics; manual provider-reported metrics can also be recorded at `/api/drafts/<id>/performance`. Available route groups include `/api/voice-profiles`, `/api/scenarios`, `/api/campaigns`, `/api/drafts`, `/api/platforms`, and `/api/performance`. Performance records are separate from the writing-quality rubric and are not click/view predictions.
+## The 90-second demo
+
+1. **Say or type a real post idea.** Pick the language for the draft.
+2. **Add context that changes the writing.** Choose a saved voice, specify an audience, or add verified facts and rules.
+3. **Set the target.** Choose a platform and length; see the actual word count and channel limit.
+4. **Build the pack.** Generate Instagram, LinkedIn, and X versions from the same brief.
+5. **Make it yours.** Edit the copy, inspect the quality rubric, then approve the saved text if publishing is configured.
+
+## Built with
+
+| Layer | What it does |
+|---|---|
+| HTML, CSS, vanilla JavaScript | Responsive workspace, onboarding, brief controls, draft editor, and campaign pack |
+| Python + Flask | Generation, voice profiles, discovery, transcription routing, draft storage, and approval |
+| SQLite | Local storage for profiles, campaigns, drafts, and optional provider-reported observations |
+| Sarvam or compatible chat-completions API | Draft generation when configured; model credentials stay server-side |
+| KrishiDisha local STT | IndicConformer-first Hindi/Kannada transcription with quality checks and local Whisper fallback |
+| Google Trends / optional SerpAPI | Related-search discovery and optional Instagram profile-post lookup |
+| Optional HTTPS webhook | Sends `text` and `prompt` query parameters after explicit approval |
+
+## Quickstart
+
+### 1. Install and run
+
+Requires Python 3.10 or later.
+
+```bash
+git clone https://github.com/Anvation-CSE-2026/ANV26-AI-41_Pehchaan.git
+cd ANV26-AI-41_Pehchaan
+python -m venv .venv
+```
+
+Activate the environment and install dependencies:
+
+```powershell
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+```bash
+# macOS / Linux
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Copy `.env.example` to `.env`, configure only the integrations you want, then start the app:
+
+```powershell
+# Windows PowerShell
+Copy-Item .env.example .env
+python app.py
+```
+
+```bash
+# macOS / Linux
+cp .env.example .env
+python app.py
+```
+
+Open **http://127.0.0.1:8890**.
+
+### 2. Configure optional integrations
+
+- **Draft generation:** set `SARVAM_API_KEY`, or configure `LLM_API_KEY`, `LLM_MODEL`, and optionally `LLM_BASE_URL` for a compatible endpoint.
+- **Search features:** set `SERPAPI_API_KEY` for Instagram profile lookup; Trends suggestions are separate and may be used without it.
+- **Publishing:** set `TELEGRAM_POST_WEBHOOK_URL` to your own HTTPS n8n webhook. The app sends exactly `text` and `prompt` as query parameters; map those fields in your workflow. A blank prompt means a text-only request.
+- **Hindi/Kannada speech input:** install KrishiDisha locally and set `KRISHIDISHA_ROOT` in `.env` to its directory. The app does not download speech models.
+
+`.env` is ignored by Git. **Never put API keys, access tokens, or private webhook URLs in source files or `.env.example`.** Keep real credentials local or in your deployment secret manager; use blank values in `.env.example`.
+
+## API quick reference
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/health` | Reports active model mode and safe integration availability |
+| `POST /api/generate` | Creates one adapted draft with language, channel, voice, and length constraints |
+| `POST /api/score` | Returns the explainable writing-quality rubric; not an engagement prediction |
+| `POST /api/transcribe` | Routes audio through the configured local speech-recognition workflow |
+| `POST /api/discover` | Finds public authored-post candidates for supported profile URLs |
+| `POST /api/trends` | Returns related search ideas for a query and region |
+
+The app also serves voice-profile, campaign, draft, and optional publishing routes. See `app.py` for request and response details.
+
+## Privacy, trust, and current limits
+
+- Speech audio is handled by the local STT workflow, stored temporarily for processing, then deleted.
+- Draft text is sent to the configured model provider when remote generation is enabled. Add only content you are permitted to share with that provider.
+- Profiles and drafts are stored in local SQLite by default. OAuth tokens, when configured, are encrypted at rest; generated local secrets and the database are ignored by Git.
+- The quality score is a transparent heuristic. It does not forecast likes, views, reach, or sales.
+- Platform imports and publishing depend on provider credentials, account type, permissions, and review. Publishing is optional; nothing is sent without approval.
+- This is a hackathon MVP, not a multi-tenant production service. A public deployment needs authentication, CSRF protection, per-user data isolation, rate limits, and an operator-managed secrets store.
+
+## Project status
+
+Pehchaan is a working MVP focused on making voice-aware, multilingual social drafting easier to repeat. It runs in local starter mode without a generation key; model-backed drafting and optional integrations need their own configuration.
+
+---
+
+<div align="center">
+  <strong>PEHCHAAN</strong><br />
+  Posts that sound like you.
+</div>
